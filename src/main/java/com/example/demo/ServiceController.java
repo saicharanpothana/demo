@@ -25,79 +25,70 @@ import com.charan.WSDLParserProject.SoapUtils;
 @RestController
 class ServiceController {
 
+	@GetMapping("/wsdl")
+	ArrayList parseWsdl() {
 
-  @GetMapping("/wsdl")
-   ArrayList parseWsdl() {
-	  
-      ArrayList serviceArray = new ArrayList<Object>();
+		ArrayList serviceArray = new ArrayList<Object>();
 
-	    try {
-	    	
-	      URL wsdlURL = new File("calculator.wsdl").toURI().toURL();
-	      WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
-	      wsdlReader.setFeature("javax.wsdl.verbose", true);
-	      Definition wsdlDefinition = wsdlReader.readWSDL(wsdlURL.toString());
-	      Map<String, Service> wsdlServices = wsdlDefinition.getServices();
-	      
-	      for (Service wsdlService : wsdlServices.values()) {
-	    	  	System.out.println("Service: " + wsdlService.getQName().getLocalPart());
-	        Map<String, Port> wsdlPorts = wsdlService.getPorts();
-	        ArrayList portsArray = new ArrayList<Object>();
-	        
-	        for (Port wsdlPort : wsdlPorts.values()) {
-	          System.out.println("  - Port: "+ wsdlPort.getName());
-	          List<ExtensibilityElement> wsdlElements = wsdlPort.getExtensibilityElements();
-		      ArrayList locationUriArray = new ArrayList<Object>();
-	          
-	          for (ExtensibilityElement wsdlElement : wsdlElements) {
-	            System.out.println("    - LocationURI: " + SoapUtils.getLocationURI(wsdlElement));
-	            locationUriArray.add(SoapUtils.getLocationURI(wsdlElement));
-	          };
-	          
-	          List<BindingOperation> wsdlBindingOperations = wsdlPort.getBinding().getBindingOperations();
-	          ArrayList operationArray = new ArrayList<Object>();
-	     	  
-	          
-	          for (BindingOperation wsdlBindingOperation : wsdlBindingOperations) {
-	            System.out.println("    - BindingOperation: " + wsdlBindingOperation.getName());
-	            Element docElement = wsdlBindingOperation.getOperation().getDocumentationElement();
-	            Map<String, Part> wsdlInputParts = wsdlBindingOperation.getOperation().getInput().getMessage().getParts();
-	            ArrayList input = new ArrayList<QName>();
-	            ArrayList output = new ArrayList<QName>();
-	            
-	            for (Part wsdlPart : wsdlInputParts.values()) {
-	              System.out.println("      - Input:  " + wsdlPart.getElementName());
-	              input.add(wsdlPart.getElementName());
-	            }
-	            
-	            Map<String, Part> wsdlOutputParts = wsdlBindingOperation.getOperation().getOutput().getMessage().getParts();
-	            
-	            for (Part wsdlPart : wsdlOutputParts.values()) {
-	              System.out.println("      - Output: " + wsdlPart.getElementName());
-	              output.add(wsdlPart.getElementName());
-	            }
-	            
-         		Operation operation = new Operation(wsdlBindingOperation.getName(),input,output);
-         		operationArray.add(operation);
-	            System.out.println("----------------------------------");
-	            
-	          }
-	          
-	          EndPointPort portObj = new EndPointPort(wsdlPort.getName(),locationUriArray,operationArray);
-	          portsArray.add(portObj);
-	          
-	        }
-	        WSDLService s = new WSDLService(wsdlService.getQName().getLocalPart(),portsArray);
-	        serviceArray.add(s);
-	      }
-	      
-	      
-	    }
-	    catch (Exception e) {
-	      System.out.println(e.getMessage());
-	    
-  }
-	    return serviceArray;
+		try {
 
-}
+			URL wsdlURL = new File("calculator.wsdl").toURI().toURL();
+			WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
+			wsdlReader.setFeature("javax.wsdl.verbose", true);
+			Definition wsdlDefinition = wsdlReader.readWSDL(wsdlURL.toString());
+			Map<String, Service> wsdlServices = wsdlDefinition.getServices();
+
+			for (Service wsdlService : wsdlServices.values()) {
+
+				Map<String, Port> wsdlPorts = wsdlService.getPorts();
+				ArrayList portsArray = new ArrayList<Object>();
+
+				for (Port wsdlPort : wsdlPorts.values()) {
+					List<ExtensibilityElement> wsdlElements = wsdlPort.getExtensibilityElements();
+					ArrayList locationUriArray = new ArrayList<Object>();
+
+					for (ExtensibilityElement wsdlElement : wsdlElements) {
+						locationUriArray.add(SoapUtils.getLocationURI(wsdlElement));
+					}
+
+					List<BindingOperation> wsdlBindingOperations = wsdlPort.getBinding().getBindingOperations();
+					ArrayList operationArray = new ArrayList<Object>();
+
+					for (BindingOperation wsdlBindingOperation : wsdlBindingOperations) {
+						Element docElement = wsdlBindingOperation.getOperation().getDocumentationElement();
+						Map<String, Part> wsdlInputParts = wsdlBindingOperation.getOperation().getInput().getMessage().getParts();
+						ArrayList input = new ArrayList<QName>();
+						ArrayList output = new ArrayList<QName>();
+
+						for (Part wsdlPart : wsdlInputParts.values()) {
+							input.add(wsdlPart.getElementName());
+						}
+
+						Map<String, Part> wsdlOutputParts = wsdlBindingOperation.getOperation().getOutput().getMessage()
+								.getParts();
+
+						for (Part wsdlPart : wsdlOutputParts.values()) {
+							output.add(wsdlPart.getElementName());
+						}
+
+						Operation operation = new Operation(wsdlBindingOperation.getName(), input, output);
+						operationArray.add(operation);
+
+					}
+
+					EndPointPort portObj = new EndPointPort(wsdlPort.getName(), locationUriArray, operationArray);
+					portsArray.add(portObj);
+
+				}
+				WSDLService s = new WSDLService(wsdlService.getQName().getLocalPart(), portsArray);
+				serviceArray.add(s);
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+
+		}
+
+		return serviceArray;
+	}
 }
