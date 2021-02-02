@@ -27,7 +27,7 @@ class ServiceController {
 
 
   @GetMapping("/wsdl")
-   ArrayList saveService() {
+   ArrayList parseWsdl() {
 	  
       ArrayList serviceArray = new ArrayList<Object>();
 
