@@ -16,12 +16,7 @@ import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Element;
 
@@ -31,17 +26,9 @@ import com.charan.WSDLParserProject.SoapUtils;
 class ServiceController {
 
 
-  @GetMapping("/employees")
+  @GetMapping("/wsdl")
    ArrayList saveService() {
-//	Service service1 = new Service("Test Service 1","111111");
-//	Service service2 = new Service("Test Service 2","222222");
-//	
-//	ArrayList array = new ArrayList<Object>();
-//	array.add(service1);
-//	array.add(service2);
-//	
-//	
-//    return array;
+	  
       ArrayList serviceArray = new ArrayList<Object>();
 
 	    try {
@@ -50,55 +37,31 @@ class ServiceController {
 	      WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
 	      wsdlReader.setFeature("javax.wsdl.verbose", true);
 	      Definition wsdlDefinition = wsdlReader.readWSDL(wsdlURL.toString());
-
-	      
 	      Map<String, Service> wsdlServices = wsdlDefinition.getServices();
 	      
 	      for (Service wsdlService : wsdlServices.values()) {
-	    	  
-	        System.out.println("Service: " + wsdlService.getQName().getLocalPart());
-	        
-	        
+	    	  	System.out.println("Service: " + wsdlService.getQName().getLocalPart());
 	        Map<String, Port> wsdlPorts = wsdlService.getPorts();
-	        
 	        ArrayList portsArray = new ArrayList<Object>();
 	        
-	        
-	        
 	        for (Port wsdlPort : wsdlPorts.values()) {
-	        	
 	          System.out.println("  - Port: "+ wsdlPort.getName());
-	          
 	          List<ExtensibilityElement> wsdlElements = wsdlPort.getExtensibilityElements();
-	          
 		      ArrayList locationUriArray = new ArrayList<Object>();
 	          
 	          for (ExtensibilityElement wsdlElement : wsdlElements) {
-	        	  
 	            System.out.println("    - LocationURI: " + SoapUtils.getLocationURI(wsdlElement));
-	            
 	            locationUriArray.add(SoapUtils.getLocationURI(wsdlElement));
-	            
-	            
 	          };
 	          
 	          List<BindingOperation> wsdlBindingOperations = wsdlPort.getBinding().getBindingOperations();
-	          
-	          
-		     ArrayList operationArray = new ArrayList<Object>();
+	          ArrayList operationArray = new ArrayList<Object>();
 	     	  
 	          
 	          for (BindingOperation wsdlBindingOperation : wsdlBindingOperations) {
-	        	
 	            System.out.println("    - BindingOperation: " + wsdlBindingOperation.getName());
-	            
-	   
 	            Element docElement = wsdlBindingOperation.getOperation().getDocumentationElement();
-
-
-
 	            Map<String, Part> wsdlInputParts = wsdlBindingOperation.getOperation().getInput().getMessage().getParts();
-	            
 	            ArrayList input = new ArrayList<QName>();
 	            ArrayList output = new ArrayList<QName>();
 	            
@@ -115,15 +78,12 @@ class ServiceController {
 	            }
 	            
          		Operation operation = new Operation(wsdlBindingOperation.getName(),input,output);
-	            
-	
          		operationArray.add(operation);
 	            System.out.println("----------------------------------");
 	            
 	          }
 	          
 	          EndPointPort portObj = new EndPointPort(wsdlPort.getName(),locationUriArray,operationArray);
-	          
 	          portsArray.add(portObj);
 	          
 	        }
